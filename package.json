@@ -1,0 +1,125 @@
+{
+  "name": "vbcc-amiga",
+  "displayName": "VBCC Amiga Compiler Support",
+  "description": "Integrates vbcc/vasm/vlink and Amiga NDK with VS Code C/C++ IntelliSense.",
+  "version": "0.0.1",
+  "publisher": "charabaruk",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "amiga",
+    "vbcc",
+    "vasm",
+    "vlink",
+    "cpptools"
+  ],
+  "activationEvents": [
+    "onLanguage:c"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vbccAmiga.validateToolchain",
+        "title": "VBCC Amiga: Validate Toolchain"
+      },
+      {
+        "command": "vbccAmiga.generateCppProperties",
+        "title": "VBCC Amiga: Generate c_cpp_properties.json"
+      },
+      {
+        "command": "vbccAmiga.reportNdkVersion",
+        "title": "VBCC Amiga: Report NDK Version"
+      },
+      {
+        "command": "vbccAmiga.reportNdkPaths",
+        "title": "VBCC Amiga: Report NDK Paths"
+      }
+    ],
+    "configuration": {
+      "title": "VBCC Amiga",
+      "properties": {
+        "vbccAmiga.vbccRoot": {
+          "type": "string",
+          "default": "/opt/amiga/vbcc",
+          "description": "Absolute path to the VBCC root directory. When unset, defaults to $VBCC if defined; otherwise /opt/amiga/vbcc on Linux/macOS or C:\\vbcc on Windows."
+        },
+        "vbccAmiga.ndkPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the Amiga NDK root directory."
+        },
+        "vbccAmiga.vbccConfig": {
+          "type": "string",
+          "default": "aos68k",
+          "description": "vbcc profile name (for example, aos68k), passed as +config. Also used to infer vbccAmiga.vbccTarget when vbccTarget is unset. Special case: newlib resolves include/lib paths from VBCC/newlib instead of targets/<target>."
+        },
+        "vbccAmiga.vbccTarget": {
+          "type": "string",
+          "default": "",
+          "description": "vbcc target directory name under targets/<target>. When unset, inferred from vbccAmiga.vbccConfig (aos68k* -> m68k-amigaos, aosppc -> ppc-amigaos, kick13* -> m68k-kick13, morphos|powerup|warpos -> ppc-<config>)."
+        },
+        "vbccAmiga.intelliSenseMode": {
+          "type": "string",
+          "default": "gcc-x64",
+          "enum": [
+            "gcc-x64",
+            "gcc-x86",
+            "gcc-arm",
+            "gcc-arm64",
+            "clang-x64",
+            "clang-x86",
+            "clang-arm",
+            "clang-arm64"
+          ],
+          "description": "IntelliSense mode to report to C/C++."
+        },
+        "vbccAmiga.cStandard": {
+          "type": "string",
+          "default": "c89",
+          "enum": [
+            "c89",
+            "c99"
+          ],
+          "description": "C language standard for IntelliSense (vbcc supports C89/C99)."
+        },
+        "vbccAmiga.extraIncludePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional include paths appended to the IntelliSense configuration."
+        },
+        "vbccAmiga.extraDefines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional preprocessor defines appended to the IntelliSense configuration."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.4.5",
+    "@vscode/vsce": "^3.6.2"
+  },
+  "dependencies": {
+    "vscode-cpptools": "^7.1.1"
+  }
+}
