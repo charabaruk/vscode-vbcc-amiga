@@ -26,6 +26,29 @@ export interface ResolvedToolchainPaths {
 
 type NdkVersionKey = "1.3" | "2.0" | "3.1" | "3.2" | "3.5" | "3.9";
 
+export enum VbccArchitecture {
+  M68K = "m68k",
+  PPC = "ppc",
+  Unknown = "unknown",
+}
+
+export function getVbccArchitecture(vbccTarget: string): VbccArchitecture {
+  const normalizedTarget = vbccTarget.trim().toLowerCase();
+  if (!normalizedTarget) {
+    return VbccArchitecture.Unknown;
+  }
+
+  if (normalizedTarget.startsWith("ppc") || normalizedTarget.includes("-ppc")) {
+    return VbccArchitecture.PPC;
+  }
+
+  if (normalizedTarget.startsWith("m68k") || normalizedTarget.includes("-m68k")) {
+    return VbccArchitecture.M68K;
+  }
+
+  return VbccArchitecture.Unknown;
+}
+
 const NDK_INCLUDE_SEGMENTS_BY_VERSION: Readonly<Record<NdkVersionKey, readonly string[][]>> = {
   "1.3": [],
   "2.0": [],
@@ -85,7 +108,7 @@ export function getNdkIncludePaths(ndkPath: string, vbccTarget: string): string[
     return [];
   }
 
-  if (isPpcTarget(vbccTarget)) {
+  if (getVbccArchitecture(vbccTarget) === VbccArchitecture.PPC) {
     const ppcPaths = getPpcNdkIncludePaths(root, vbccTarget);
     if (ppcPaths.length > 0) {
       return ppcPaths;
@@ -108,7 +131,7 @@ export function getNdkIncludePaths(ndkPath: string, vbccTarget: string): string[
 }
 
 function resolveNdkVersion(ndkRoot: string, vbccTarget: string): NdkVersionKey | undefined {
-  if (isPpcTarget(vbccTarget)) {
+  if (getVbccArchitecture(vbccTarget) === VbccArchitecture.PPC) {
     return undefined;
   }
 
@@ -124,7 +147,7 @@ export function resolveNdkVersionWithSource(ndkRoot: string, vbccTarget: string)
   version: NdkVersionKey | undefined;
   source: "ppc" | "path" | "target" | "none";
 } {
-  if (isPpcTarget(vbccTarget)) {
+  if (getVbccArchitecture(vbccTarget) === VbccArchitecture.PPC) {
     return { version: undefined, source: "ppc" };
   }
 
@@ -178,21 +201,11 @@ function getDefaultNdkVersionForTarget(vbccTarget: string): NdkVersionKey | unde
     return "1.3";
   }
 
-  if (isM68kTarget(normalizedTarget)) {
+  if (getVbccArchitecture(normalizedTarget) === VbccArchitecture.M68K) {
     return "3.2";
   }
 
   return undefined;
-}
-
-function isPpcTarget(vbccTarget: string): boolean {
-  const normalizedTarget = vbccTarget.trim().toLowerCase();
-  return normalizedTarget.startsWith("ppc") || normalizedTarget.includes("-ppc");
-}
-
-function isM68kTarget(vbccTarget: string): boolean {
-  const normalizedTarget = vbccTarget.trim().toLowerCase();
-  return normalizedTarget.startsWith("m68k") || normalizedTarget.includes("-m68k");
 }
 
 function resolveNdkRootRelativePaths(ndkRoot: string, pathSegments: readonly string[][]): string[] {
@@ -225,7 +238,7 @@ export function getNdkLibraryPaths(ndkPath: string, vbccTarget: string): string[
     return [];
   }
 
-  if (isPpcTarget(vbccTarget)) {
+  if (getVbccArchitecture(vbccTarget) === VbccArchitecture.PPC) {
     const ppcPaths = getPpcNdkLibraryPaths(root, vbccTarget);
     if (ppcPaths.length > 0) {
       return ppcPaths;
@@ -291,20 +304,14 @@ export function inferVbccTargetFromConfig(vbccConfig: string): string {
 }
 
 export function getVbccArchitectureDefine(_vbccConfig: string, vbccTarget: string): string | undefined {
-  const normalizedTarget = vbccTarget.trim().toLowerCase();
-  if (!normalizedTarget) {
+  switch (getVbccArchitecture(vbccTarget)) {
+    case VbccArchitecture.PPC:
+      return "__PPC__";
+    case VbccArchitecture.M68K:
+      return "__M68K__";
+    default:
     return undefined;
   }
-
-  if (normalizedTarget.startsWith("ppc") || normalizedTarget.includes("-ppc")) {
-    return "__PPC__";
-  }
-
-  if (normalizedTarget.startsWith("m68k") || normalizedTarget.includes("-m68k")) {
-    return "__M68K__";
-  }
-
-  return undefined;
 }
 
 function isNewlibConfig(vbccConfig: string): boolean {

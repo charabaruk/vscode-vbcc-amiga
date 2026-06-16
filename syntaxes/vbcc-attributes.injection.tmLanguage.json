@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "VBCC Attributes Injection",
+  "scopeName": "source.c.vbcc-amiga.injection",
+  "injectionSelector": "L:source.c, L:source.cpp",
+  "patterns": [
+    {
+      "name": "storage.modifier.attribute.vbcc-amiga.c",
+      "match": "\\b(__saveds|__chip|__far|__near|__interrupt|__amigainterrupt|__saveall|__entry|__inline)\\b"
+    },
+    {
+      "name": "support.function.attribute.vbcc-amiga.c",
+      "match": "\\b(__section|__reg|__regsused|__varsmodified|__writesmem|__readsmem)\\b(?=\\s*\\()"
+    },
+    {
+      "name": "support.function.builtin.vbcc-amiga.c",
+      "match": "\\b(__typeof|__alignof|__offsetof)\\b(?=\\s*\\()"
+    }
+  ]
+}

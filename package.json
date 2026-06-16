@@ -42,6 +42,16 @@
         "title": "VBCC Amiga: Report NDK Paths"
       }
     ],
+    "grammars": [
+      {
+        "scopeName": "source.c.vbcc-amiga.injection",
+        "path": "./syntaxes/vbcc-attributes.injection.tmLanguage.json",
+        "injectTo": [
+          "source.c",
+          "source.cpp"
+        ]
+      }
+    ],
     "configuration": {
       "title": "VBCC Amiga",
       "properties": {

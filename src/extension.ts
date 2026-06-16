@@ -7,7 +7,7 @@ import {
 } from "vscode-cpptools";
 import { registerCommands } from "./commands";
 import { trace, traceOutput } from "./core";
-import { VbccAmigaConfigurationProvider } from "./providers";
+import { VbccAmigaConfigurationProvider, registerVbccAttributeHelpProvider } from "./providers";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(traceOutput);
@@ -28,6 +28,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   registerCommands(context);
+  registerVbccAttributeHelpProvider(context);
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {

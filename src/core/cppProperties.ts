@@ -3,7 +3,9 @@ import { SourceFileConfiguration, WorkspaceBrowseConfiguration } from "vscode-cp
 import {
   CppStandard,
   IntelliSenseMode,
+  VbccArchitecture,
   VbccAmigaSettings,
+  getVbccArchitecture,
   getEffectiveVbccConfig,
   getEffectiveVbccTarget,
   getNdkIncludePaths,
@@ -17,6 +19,25 @@ import {
   resolveToolchainPaths,
   uniqueExistingPaths,
 } from "./settings";
+
+const VBCC_COMMON_INTELLISENSE_SHIM_DEFINES = [
+  "__asm=",
+  "__saveds=",
+  "__chip=",
+  "__far=",
+  "__near=",
+  "__interrupt=",
+  "__entry=",
+  "__inline=",
+  "__reg(x)=",
+  "__regsused(x)=",
+  "__varsmodified(x)=",
+  "__writesmem(x)=",
+  "__readsmem(x)=",
+  "__typeof(x)=1",
+  "__alignof(x)=1",
+  "__offsetof(type,member)=((unsigned long)&(((type*)0)->member))",
+];
 
 export interface CppPropertiesConfiguration {
   name: string;
@@ -65,8 +86,27 @@ export function buildDefines(settings: VbccAmigaSettings): string[] {
     defines.push(architectureDefine);
   }
 
+  defines.push(...buildShimDefines(vbccTarget));
+
   defines.push(...settings.extraDefines.filter((item) => item.trim().length > 0));
   return Array.from(new Set(defines));
+}
+
+function buildShimDefines(vbccTarget: string): string[] {
+  const defines = [...VBCC_COMMON_INTELLISENSE_SHIM_DEFINES];
+  const architecture = getVbccArchitecture(vbccTarget);
+
+  if (architecture === VbccArchitecture.PPC) {
+    defines.push("__section(name,attrs)=");
+    defines.push("__saveall=");
+  }
+
+  if (architecture === VbccArchitecture.M68K) {
+    defines.push("__section(name)=");
+    defines.push("__amigainterrupt=");
+  }
+
+  return defines;
 }
 
 export function buildCompilerArgs(settings: VbccAmigaSettings): string[] {
